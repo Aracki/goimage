@@ -17,36 +17,50 @@ import (
 	"github.com/pkg/errors"
 )
 
-func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+var (
+	BadDimensionError          = errors.New("Each dimension must be a number.")
+	DimensionParamMissingError = errors.New("Dimension params are missing.")
+	bucketSrc                  = "gohexis-source"
+	bucketDst                  = "gohexis-destination"
+	imgName                    = "under_the_sun.jpg"
+)
 
-	// stdout and stderr are sent to AWS CloudWatch Logs
-	log.Printf("Proccessing Lambda request %s\n", request.RequestContext.RequestID)
+// ProcessParams checks if there are proper dim params (eg. ?dim=200x200&dim350x350).
+// Returns an array of Dimension struct.
+func processParams(params map[string]string) (dimensions []resize.Dimension, err error) {
 
-	bucketSrc := "gohexis-source"
-	bucketDst := "gohexis-destination"
-	imgName := "under_the_sun.jpg"
-
-	var variations []resize.Dimension
-	for k, v := range request.QueryStringParameters {
+	for k, v := range params {
 		if k == "dim" {
 			width, err := strconv.Atoi(strings.Split(v, "x")[0])
 			if err != nil {
-				return events.APIGatewayProxyResponse{}, err
+				return nil, err
 			}
 			height, err := strconv.Atoi(strings.Split(v, "x")[1])
 			if err != nil {
-				return events.APIGatewayProxyResponse{}, err
+				return nil, err
 			}
 
-			variations = append(variations, resize.Dimension{
+			dimensions = append(dimensions, resize.Dimension{
 				Width:  width,
 				Height: height,
 			})
 		}
 	}
+	return dimensions, nil
+}
 
-	if len(variations) == 0 {
-		return events.APIGatewayProxyResponse{}, errors.New("Dimension params are missing!")
+func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	// stdout and stderr are sent to AWS CloudWatch Logs
+	log.Printf("Proccessing Lambda request %s\n", request.RequestContext.RequestID)
+
+	if len(request.QueryStringParameters) == 0 {
+		return events.APIGatewayProxyResponse{StatusCode: 400}, DimensionParamMissingError
+	}
+
+	dimensions, err := processParams(request.QueryStringParameters)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400}, BadDimensionError
 	}
 
 	// todo document s3 configuration
@@ -63,7 +77,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// Resize image
-	if _, err = resize.Resize(&imgFile, variations); err != nil {
+	if _, err = resize.Resize(&imgFile, dimensions); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 500}, err
 	}
 
