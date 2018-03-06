@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 
 	"github.com/aracki/gohexis/gohexis/api"
@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/pkg/errors"
 )
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -47,10 +48,14 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{StatusCode: 500}, err
 	}
 
-	return events.APIGatewayProxyResponse{
-		Body:       fmt.Sprintf("Lambda function successfully executed!"),
-		StatusCode: 200,
-	}, nil
+	if jsonResp, err := json.Marshal(filePaths); err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 500}, errors.New("Cannot marshal list of paths")
+	} else {
+		return events.APIGatewayProxyResponse{
+			Body:       string(jsonResp),
+			StatusCode: 200,
+		}, nil
+	}
 }
 
 func main() {

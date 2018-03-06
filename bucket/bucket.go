@@ -49,9 +49,7 @@ func PutObjectToS3(svc *s3.S3, bucketName string, pathList []string) error {
 		if err != nil {
 			return err
 		}
-		defer f.Close()
 
-		// copy f to ReadSeeker
 		fileInfo, err := f.Stat()
 		if err != nil {
 			return err
@@ -83,7 +81,8 @@ func PutObjectToS3(svc *s3.S3, bucketName string, pathList []string) error {
 			return err
 		}
 
-		fmt.Printf("successfully uploaded file to %s/%s\n", bucketName, p)
+		fmt.Printf("Successfully uploaded file to %s/%s\n", bucketName, p)
+		f.Close()
 	}
 
 	return nil
