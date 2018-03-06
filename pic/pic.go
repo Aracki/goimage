@@ -50,7 +50,7 @@ func Resize(img image.Image, imgName string, dims []api.Dimension) ([]string, er
 
 	for _, d := range dims {
 
-		fullPath, err := resizeImage(img, d.W, d.H, imgName, imaging.Lanczos)
+		fullPath, err := resizeImage(img, d.Width, d.Height, imgName, imaging.Lanczos)
 		if err != nil {
 			return nil, err
 		}

@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -20,8 +19,8 @@ type ReqBody struct {
 }
 
 type Dimension struct {
-	W int `json:"w"`
-	H int `json:"h"`
+	Width  int `json:"w"`
+	Height int `json:"h"`
 }
 
 // ProcessParams checks if there are proper dim params (eg. ?dim=200x200&dim350x350).
@@ -33,19 +32,19 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 	if v, ok := queryParams["name"]; ok {
 		p.ImgName = v
 	} else {
-		return errors.New(fmt.Sprintf("Missing imgName param"))
+		return fmt.Errorf("missing imgName param")
 	}
 
 	if v, ok := queryParams["bucketSrc"]; ok {
 		p.BucketSrc = v
 	} else {
-		return errors.New(fmt.Sprintf("Missing bucketSrc param"))
+		return fmt.Errorf("missing bucketSrc param")
 	}
 
 	if v, ok := queryParams["bucketDst"]; ok {
 		p.BucketDst = v
 	} else {
-		return errors.New(fmt.Sprintf("Missing bucketDst param"))
+		return fmt.Errorf("missing bucketDst param")
 	}
 
 	if request.Body != "" {
@@ -59,7 +58,7 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 		p.Dimensions = allDim
 
 	} else {
-		return errors.New(fmt.Sprintf("Missing body"))
+		return fmt.Errorf("missing body")
 	}
 
 	return nil
