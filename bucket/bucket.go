@@ -15,12 +15,15 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func GetImageFromS3(svc *s3.S3, bucketName string, fileName string) (resize.ImageFile, error) {
+// GetImageFromS3 gets object from s3 source-bucket by key.
+// Encode that object to image interface
+// and returns it and it's name.
+func GetImageFromS3(svc *s3.S3, bucketName string, key string) (resize.ImageFile, error) {
 
 	ctx := context.Background()
 	res, err := svc.GetObjectWithContext(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String(fileName),
+		Key:    aws.String(key),
 	})
 	if err != nil {
 		aerr, ok := err.(awserr.Error)
@@ -30,16 +33,17 @@ func GetImageFromS3(svc *s3.S3, bucketName string, fileName string) (resize.Imag
 		}
 		return resize.ImageFile{}, err
 	} else {
-		fmt.Printf("%s downloaded from %s\n", fileName, bucketName)
+		fmt.Printf("%s downloaded from %s\n", key, bucketName)
 	}
 	defer res.Body.Close()
 
 	img1, _, _ := image.Decode(res.Body)
 
-	return resize.ImageFile{Image: img1, FileName: fileName}, nil
+	return resize.ImageFile{Image: img1, FileName: key}, nil
 }
 
-func PutObjectToS3(svc *s3.S3, bucketName string, pathList []string) error {
+// UploadAllToS3 uploads all the files from pathList to s3 destination-bucket.
+func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
 
 	for _, p := range pathList {
 
@@ -73,9 +77,7 @@ func PutObjectToS3(svc *s3.S3, bucketName string, pathList []string) error {
 			if aerr, ok := err.(awserr.Error); ok && aerr.Code() == request.CanceledErrorCode {
 				// If the SDK can determine the request or retry delay was canceled
 				// by a context the CanceledErrorCode error code will be returned.
-				fmt.Fprintf(os.Stderr, "upload canceled due to timeout, %v\n", err)
-			} else {
-				fmt.Fprintf(os.Stderr, "failed to upload object, %v\n", err)
+				fmt.Fprintf(os.Stderr, "Upload canceled due to timeout, %v\n", err)
 			}
 			return err
 		}

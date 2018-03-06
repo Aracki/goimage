@@ -18,8 +18,10 @@ type ImageFile struct {
 	FullPath string
 }
 
-// Resize function take imgFile interface and array of dimensions.
+// Resize function take Image interface and array of dimensions.
 // According to that array it will resize each image sequentially.
+// Resized images are saved to fullPath.
+// FullPath must start with /tmp/ because of lambda write-to-file rule.
 func Resize(imgFile *ImageFile, dims []api.Dimension) ([]string, error) {
 
 	var files []string

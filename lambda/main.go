@@ -52,7 +52,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// Put multiple images on destination bucket to proper paths
-	if err = bucket.PutObjectToS3(svc, p.BucketDst, filePaths); err != nil {
+	if err = bucket.UploadAllToS3(svc, p.BucketDst, filePaths); err != nil {
 		return Err(err)
 	}
 
@@ -69,13 +69,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 }
 
 /*
-* handler must be a function
-* handler may take between 0 and two arguments.
-* if there are two arguments, the first argument must implement "context.Context".
-* handler may return between 0 and two arguments.
-* if there are two return values, the second argument must implement "error".
-* if there is one return value it must implement "error".
- */
+	- handler must be a function
+	- handler may take between 0 and two arguments.
+	- if there are two arguments, the first argument must implement "context.Context".
+	- handler may return between 0 and two arguments.
+	- if there are two return values, the second argument must implement "error".
+	- if there is one return value it must implement "error".
+*/
 func main() {
 	lambda.Start(handler)
 }
