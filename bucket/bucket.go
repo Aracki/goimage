@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/aracki/gohexis/gohexis/resize"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/request"
@@ -18,7 +17,7 @@ import (
 // GetImageFromS3 gets object from s3 source-bucket by key.
 // Encode that object to image interface
 // and returns it and it's name.
-func GetImageFromS3(svc *s3.S3, bucketName string, key string) (resize.ImageFile, error) {
+func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 
 	ctx := context.Background()
 	res, err := svc.GetObjectWithContext(ctx, &s3.GetObjectInput{
@@ -29,17 +28,17 @@ func GetImageFromS3(svc *s3.S3, bucketName string, key string) (resize.ImageFile
 		aerr, ok := err.(awserr.Error)
 		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
 			log.Println("ErrCodeNoSuchKey occured")
-			return resize.ImageFile{}, err
+			return nil, err
 		}
-		return resize.ImageFile{}, err
+		return nil, err
 	} else {
 		fmt.Printf("%s downloaded from %s\n", key, bucketName)
 	}
 	defer res.Body.Close()
 
-	img1, _, _ := image.Decode(res.Body)
+	img, _, _ := image.Decode(res.Body)
 
-	return resize.ImageFile{Image: img1, FileName: key}, nil
+	return img, nil
 }
 
 // UploadAllToS3 uploads all the files from pathList to s3 destination-bucket.

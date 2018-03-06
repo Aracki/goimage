@@ -12,44 +12,51 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ImageFile struct {
-	Image    image.Image
-	FileName string
-	FullPath string
+// Creates folder based on dimension. (200x200, 450x400...)
+// Creates file into appropriate folder.
+// DstImg is resized original stored in-memory. It is resized with given filter.
+// That image is encoded into previously created file.
+// FullPath must start with /tmp/ because of lambda write-to-file rule.
+func resizeImage(img image.Image, w, h int, imgName string, filter imaging.ResampleFilter) (string, error) {
+
+	// create proper folder
+	folder := fmt.Sprintf("/tmp/%sx%s/", strconv.Itoa(w), strconv.Itoa(h))
+	fullPath := folder + imgName
+	_ = os.MkdirAll(folder, os.ModePerm)
+
+	// create file
+	f, err := os.Create(fullPath)
+	if err != nil {
+		return "", errors.Wrap(err, "Could not create new file")
+	}
+
+	dstImg := imaging.Resize(img, w, h, filter)
+
+	// write resized dstImg to file
+	if err := jpeg.Encode(f, dstImg, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+		return "", errors.Wrap(err, "Could not encode image")
+	}
+
+	return fullPath, nil
 }
 
-// Resize function take Image interface and array of dimensions.
+// Resize function take Image interface, image name, and array of dimensions.
 // According to that array it will resize each image sequentially.
-// Resized images are saved to fullPath.
-// FullPath must start with /tmp/ because of lambda write-to-file rule.
-func Resize(imgFile *ImageFile, dims []api.Dimension) ([]string, error) {
+// Resized images are saved into proper folders.
+// Returns list of paths where are saved images.
+func Resize(img image.Image, imgName string, dims []api.Dimension) ([]string, error) {
 
-	var files []string
+	var paths []string
 
 	for _, d := range dims {
 
-		folder := "/tmp/" +
-			strconv.Itoa(d.W) + "x" +
-			strconv.Itoa(d.H) + "/"
-
-		_ = os.MkdirAll(folder, os.ModePerm)
-		imgFile.FullPath = folder + imgFile.FileName
-
-		dstImage128 := imaging.Resize(imgFile.Image, d.W, d.H, imaging.Lanczos)
-
-		toImg, err := os.Create(imgFile.FullPath)
+		fullPath, err := resizeImage(img, d.W, d.H, imgName, imaging.Lanczos)
 		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("Could not create new file"))
+			return nil, err
 		}
-		defer toImg.Close()
-
-		if err := jpeg.Encode(toImg, dstImage128, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("Could not encode image"))
-		} else {
-			fmt.Printf("%s resized and saved\n", imgFile.FileName)
-			files = append(files, imgFile.FullPath)
-		}
+		fmt.Printf("%s resized and saved\n", imgName)
+		paths = append(paths, fullPath)
 	}
 
-	return files, nil
+	return paths, nil
 }

@@ -44,13 +44,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	svc := initS3()
 
 	// Get image from s3 bucket according to it's name and download it to /tmp/ folder
-	imgFile, err := bucket.GetImageFromS3(svc, p.BucketSrc, p.ImgName)
+	img, err := bucket.GetImageFromS3(svc, p.BucketSrc, p.ImgName)
 	if err != nil {
 		return Err(err)
 	}
 
 	// Resize image with proper algorithm and create local files under /tmp/ folder
-	filePaths, err := resize.Resize(&imgFile, p.Dimensions)
+	filePaths, err := resize.Resize(img, p.ImgName, p.Dimensions)
 	if err != nil {
 		return Err(err)
 	}
