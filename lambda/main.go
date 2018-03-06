@@ -15,6 +15,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+func initS3() *s3.S3 {
+	sess := session.Must(session.NewSession())
+	return s3.New(sess, &aws.Config{
+		Region: aws.String(endpoints.UsEast1RegionID),
+	})
+}
+
 // Err returns response with error message in body (if error is nil).
 // If returns error than body will be 'Internal server error' with status 500.
 func Err(e error) (events.APIGatewayProxyResponse, error) {
@@ -34,10 +41,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return events.APIGatewayProxyResponse{StatusCode: 400}, err
 	}
 
-	sess := session.Must(session.NewSession())
-	svc := s3.New(sess, &aws.Config{
-		Region: aws.String(endpoints.UsEast1RegionID),
-	})
+	svc := initS3()
 
 	// Get image from s3 bucket according to it's name and download it to /tmp/ folder
 	imgFile, err := bucket.GetImageFromS3(svc, p.BucketSrc, p.ImgName)
