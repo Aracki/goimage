@@ -18,35 +18,54 @@ import (
 )
 
 var (
-	BadDimensionError          = errors.New("Each dimension must be a number.")
-	DimensionParamMissingError = errors.New("Dimension params are missing.")
-	bucketSrc                  = "gohexis-source"
-	bucketDst                  = "gohexis-destination"
-	imgName                    = "under_the_sun.jpg"
+	imgName    string
+	dimensions []resize.Dimension
+	bucketSrc  string
+	bucketDst  string
 )
 
 // ProcessParams checks if there are proper dim params (eg. ?dim=200x200&dim350x350).
 // Returns an array of Dimension struct.
-func processParams(params map[string]string) (dimensions []resize.Dimension, err error) {
+func processParams(params map[string]string) (err error) {
 
-	for k, v := range params {
-		if k == "dim" {
-			width, err := strconv.Atoi(strings.Split(v, "x")[0])
-			if err != nil {
-				return nil, err
-			}
-			height, err := strconv.Atoi(strings.Split(v, "x")[1])
-			if err != nil {
-				return nil, err
-			}
-
-			dimensions = append(dimensions, resize.Dimension{
-				Width:  width,
-				Height: height,
-			})
-		}
+	if v, ok := params["name"]; ok {
+		imgName = v
+	} else {
+		return errors.New(fmt.Sprintf("Missing imgName param"))
 	}
-	return dimensions, nil
+
+	if v, ok := params["bucketSrc"]; ok {
+		bucketSrc = v
+	} else {
+		return errors.New(fmt.Sprintf("Missing bucketSrc param"))
+	}
+
+	if v, ok := params["bucketDst"]; ok {
+		bucketDst = v
+	} else {
+		return errors.New(fmt.Sprintf("Missing bucketDst param"))
+	}
+
+	if v, ok := params["dim"]; ok {
+
+		width, err := strconv.Atoi(strings.Split(v, "x")[0])
+		if err != nil {
+			return errors.New("Width is not a number")
+		}
+		height, err := strconv.Atoi(strings.Split(v, "x")[1])
+		if err != nil {
+			return errors.New("Height is not a number")
+		}
+
+		dimensions = append(dimensions, resize.Dimension{
+			Width:  width,
+			Height: height,
+		})
+	} else {
+		return errors.New(fmt.Sprintf("Missing dim param"))
+	}
+
+	return nil
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -54,17 +73,10 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// stdout and stderr are sent to AWS CloudWatch Logs
 	log.Printf("Proccessing Lambda request %s\n", request.RequestContext.RequestID)
 
-	if len(request.QueryStringParameters) == 0 {
-		return events.APIGatewayProxyResponse{StatusCode: 400}, DimensionParamMissingError
+	if err := processParams(request.QueryStringParameters); err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 400}, err
 	}
 
-	dimensions, err := processParams(request.QueryStringParameters)
-	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 400}, BadDimensionError
-	}
-
-	// todo document s3 configuration
-	// returns new Session based on ~/.aws/config & ~/.aws/credentials
 	sess := session.Must(session.NewSession())
 	svc := s3.New(sess, &aws.Config{
 		Region: aws.String(endpoints.UsEast1RegionID),
@@ -87,7 +99,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	return events.APIGatewayProxyResponse{
-		Body:       fmt.Sprintf("not an error"),
+		Body:       fmt.Sprintf("Lambda function successfully executed!"),
 		StatusCode: 200,
 	}, nil
 }
