@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/aracki/gohexis/gohexis/api"
 	"github.com/disintegration/imaging"
 	"github.com/pkg/errors"
 )
@@ -17,36 +18,34 @@ type ImageFile struct {
 	FullPath string
 }
 
-type Dimension struct {
-	Width  int
-	Height int
-}
+func Resize(imgFile *ImageFile, dims []api.Dimension) ([]string, error) {
 
-func Resize(imgFile *ImageFile, variations []Dimension) (*os.File, error) {
+	var files []string
 
-	dim := variations[0]
+	for _, d := range dims {
 
-	// TODO proper create folders for multiple variations at same time
-	folder := "/tmp/" +
-		strconv.Itoa(dim.Width) + "x" +
-		strconv.Itoa(dim.Height) + "/"
+		folder := "/tmp/" +
+			strconv.Itoa(d.W) + "x" +
+			strconv.Itoa(d.H) + "/"
 
-	_ = os.MkdirAll(folder, os.ModePerm)
-	imgFile.FullPath = folder + imgFile.FileName
+		_ = os.MkdirAll(folder, os.ModePerm)
+		imgFile.FullPath = folder + imgFile.FileName
 
-	dstImage128 := imaging.Resize(imgFile.Image, dim.Width, dim.Height, imaging.Lanczos)
+		dstImage128 := imaging.Resize(imgFile.Image, d.W, d.H, imaging.Lanczos)
 
-	toImg, err := os.Create(imgFile.FullPath)
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("Could not create new file"))
-	}
-	defer toImg.Close()
+		toImg, err := os.Create(imgFile.FullPath)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("Could not create new file"))
+		}
+		defer toImg.Close()
 
-	if err := jpeg.Encode(toImg, dstImage128, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("Could not encode image"))
-	} else {
-		fmt.Printf("%s resized and saved\n", imgFile.FileName)
+		if err := jpeg.Encode(toImg, dstImage128, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("Could not encode image"))
+		} else {
+			fmt.Printf("%s resized and saved\n", imgFile.FileName)
+			files = append(files, imgFile.FullPath)
+		}
 	}
 
-	return toImg, nil
+	return files, nil
 }
