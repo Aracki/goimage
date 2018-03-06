@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 
 	"github.com/aracki/gohexis/gohexis/api"
 	"github.com/aracki/gohexis/gohexis/bucket"
@@ -26,7 +27,7 @@ func initS3() *s3.S3 {
 // If returns error than body will be 'Internal server error' with status 500.
 func Err(e error) (events.APIGatewayProxyResponse, error) {
 	return events.APIGatewayProxyResponse{
-		StatusCode: 500,
+		StatusCode: http.StatusInternalServerError,
 		Body:       e.Error(),
 	}, nil
 }
@@ -38,7 +39,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	p := api.Params{}
 	if err := api.Process(request, &p); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 400}, err
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
 	}
 
 	svc := initS3()
@@ -68,7 +69,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	return events.APIGatewayProxyResponse{
 		Body:       string(jsonResp),
-		StatusCode: 200,
+		StatusCode: http.StatusOK,
 	}, nil
 }
 
