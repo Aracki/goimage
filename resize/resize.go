@@ -18,6 +18,8 @@ type ImageFile struct {
 	FullPath string
 }
 
+// Resize function take imgFile interface and array of dimensions.
+// According to that array it will resize each image sequentially.
 func Resize(imgFile *ImageFile, dims []api.Dimension) ([]string, error) {
 
 	var files []string

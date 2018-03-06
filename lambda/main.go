@@ -13,8 +13,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/pkg/errors"
 )
+
+// Err returns response with error message in body (if error is nil).
+// If returns error than body will be 'Internal server error' with status 500.
+func Err(e error) (events.APIGatewayProxyResponse, error) {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 500,
+		Body:       e.Error(),
+	}, nil
+}
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
@@ -34,31 +42,40 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Get image from s3 bucket according to it's name and download it to /tmp/ folder
 	imgFile, err := bucket.GetImageFromS3(svc, p.BucketSrc, p.ImgName)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500}, err
+		return Err(err)
 	}
 
 	// Resize image with proper algorithm and create local files under /tmp/ folder
 	filePaths, err := resize.Resize(&imgFile, p.Dimensions)
 	if err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500}, err
+		return Err(err)
 	}
 
 	// Put multiple images on destination bucket to proper paths
 	if err = bucket.PutObjectToS3(svc, p.BucketDst, filePaths); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500}, err
+		return Err(err)
 	}
 
-	if jsonResp, err := json.Marshal(filePaths); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500}, errors.New("Cannot marshal list of paths")
-	} else {
-		return events.APIGatewayProxyResponse{
-			Body:       string(jsonResp),
-			StatusCode: 200,
-		}, nil
+	// Make filePaths json for response
+	jsonResp, err := json.Marshal(filePaths)
+	if err != nil {
+		return Err(err)
 	}
+
+	return events.APIGatewayProxyResponse{
+		Body:       string(jsonResp),
+		StatusCode: 200,
+	}, nil
 }
 
+/*
+* handler must be a function
+* handler may take between 0 and two arguments.
+* if there are two arguments, the first argument must implement "context.Context".
+* handler may return between 0 and two arguments.
+* if there are two return values, the second argument must implement "error".
+* if there is one return value it must implement "error".
+ */
 func main() {
-
 	lambda.Start(handler)
 }

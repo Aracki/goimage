@@ -23,11 +23,10 @@ func GetImageFromS3(svc *s3.S3, bucketName string, fileName string) (resize.Imag
 		Key:    aws.String(fileName),
 	})
 	if err != nil {
-		// Cast err to awserr.Error to handle specific error codes.
 		aerr, ok := err.(awserr.Error)
 		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
-			//todo remove log.fatal
-			log.Fatal(aerr.Message())
+			log.Println("ErrCodeNoSuchKey occured")
+			return resize.ImageFile{}, err
 		}
 		return resize.ImageFile{}, err
 	} else {
