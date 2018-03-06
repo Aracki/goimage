@@ -1,4 +1,4 @@
-package resize
+package pic
 
 import (
 	"fmt"

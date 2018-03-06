@@ -6,7 +6,7 @@ import (
 
 	"github.com/aracki/gohexis/gohexis/api"
 	"github.com/aracki/gohexis/gohexis/bucket"
-	"github.com/aracki/gohexis/gohexis/resize"
+	"github.com/aracki/gohexis/gohexis/pic"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
@@ -50,7 +50,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// Resize image with proper algorithm and create local files under /tmp/ folder
-	filePaths, err := resize.Resize(img, p.ImgName, p.Dimensions)
+	filePaths, err := pic.Resize(img, p.ImgName, p.Dimensions)
 	if err != nil {
 		return Err(err)
 	}
