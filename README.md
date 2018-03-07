@@ -1,24 +1,38 @@
 # goImage
 
+[TOC]
+
 And official aws go library used https://github.com/aws/aws-lambda-go
 
 Here is official aws doc: [Programming model for Golang](https://docs.aws.amazon.com/lambda/latest/dg/programming-model-v2.html) 
+
+------
+
+
 
 ## AWS Configuration
 
 #### Lambda function
 
+Under Execution Role you need to create new Role with access to: *`S3`* *&* *`CloudWatch Logs`*.
+
 #### S3 buckets
+
+Go to AWS S3 console and create source & destination buckets. 
+
+**Note**: Serverless deploy will create one bucket to store application zip and compiled *cloudformation-template.json*.
+
+#### IAM 
+
+Create user with access to: *`AmazonS3FullAccess`*, *`CloudFormation`*, *`CloudWatch Logs`*, *`IAM`*, *`Lambda`* *&* *`STS`*.
 
 #### AWS API Gateway
 
-Go to AWS Lambda console  https://console.aws.amazon.com/lambda.
+Go to AWS Lambda console https://console.aws.amazon.com/lambda.
 
-Add triggers on the left sidebar. Than you need to integrate that API Gateway with Lambda.
+Add triggers on the left sidebar. Than you need to create API Gateway that will integrate with Lambda. It needs to be _Edge Optimized_. Than make `POST` method in _Actions/Create Method_. Select existing Lambda function and check `Use Lambda Proxy integration` to true.
 
-Than make _POST_  in Actions/Create Method.
-Select existing Lambda function. <br>
-Check `Use Lambda Proxy integration` to true.
+You can make a test call to your method with the provided input.
 
 ## Deploy
 
@@ -48,7 +62,14 @@ Make _POST_ request on API url with following params:
 | lib               | lib keyword (given in Algorithm section)         |
 | filter            | filter keyword (given in ALgorithm section)      |
 
+Example of API request:
+
+```
+http://[url]/name=under_the_sun.jpg&bucketSrc=gohexis-source&bucketDst=gohexis-destination&alg=imaging&filter=l
+```
+
 Array of variations needs to be sent as JSON to request body. Example:
+
 ```
 {
     "dim": [
@@ -74,7 +95,7 @@ If successful function respond with 200 status and list of paths. Example:
 
 
 
-### Algorithms 
+## Algorithms 
 
  -  **Lanczos** (Keyword: l)
     Probably the best resampling filter for photographic images yielding sharp results, but it's slower than cubic filters (see below).
