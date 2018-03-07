@@ -23,8 +23,8 @@ type Dimension struct {
 	Height int `json:"h"`
 }
 
-// ProcessParams checks if there are proper dim params (eg. ?dim=200x200&dim350x350).
-// Returns an array of Dimension struct.
+// Process checks if there are proper dim params (eg. ?dim=200x200&dim350x350), name, bucketSrc and bucketDst.
+// Returns an error if there are some missing parameters.
 func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 
 	queryParams := request.QueryStringParameters
@@ -56,7 +56,6 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 			allDim = append(allDim, d)
 		}
 		p.Dimensions = allDim
-
 	} else {
 		return fmt.Errorf("missing body")
 	}

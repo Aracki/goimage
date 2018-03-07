@@ -1,22 +1,21 @@
 package bucket
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"image"
-	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/pkg/errors"
 )
 
 // GetImageFromS3 gets object from s3 source-bucket by key.
 // Encode that object to image interface
-// and returns it and it's name.
+// and returns it.
 func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 
 	ctx := context.Background()
@@ -27,8 +26,7 @@ func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 	if err != nil {
 		aerr, ok := err.(awserr.Error)
 		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
-			log.Println("ErrCodeNoSuchKey occured")
-			return nil, err
+			return nil, errors.Wrap(err, "ErrCodeNoSuchKey occurred")
 		}
 		return nil, err
 	} else {
@@ -36,7 +34,10 @@ func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 	}
 	defer res.Body.Close()
 
-	img, _, _ := image.Decode(res.Body)
+	img, _, err := image.Decode(res.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	return img, nil
 }
@@ -52,31 +53,18 @@ func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
 			return err
 		}
 
-		fileInfo, err := f.Stat()
-		if err != nil {
-			return err
-		}
-		size := fileInfo.Size()
-
-		buffer := make([]byte, size)
-		if _, err := f.Read(buffer); err != nil {
-			return err
-		}
-
-		fileBytes := bytes.NewReader(buffer)
-
 		// Uploads the object to S3. The Context will interrupt the request if the
 		// timeout expires.
 		_, err = svc.PutObjectWithContext(ctx, &s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(p),
-			Body:   fileBytes,
+			Body:   f,
 		})
 		if err != nil {
 			if aerr, ok := err.(awserr.Error); ok && aerr.Code() == request.CanceledErrorCode {
 				// If the SDK can determine the request or retry delay was canceled
 				// by a context the CanceledErrorCode error code will be returned.
-				fmt.Fprintf(os.Stderr, "Upload canceled due to timeout, %v\n", err)
+				return errors.Wrap(err, "upload canceled due to timeout")
 			}
 			return err
 		}

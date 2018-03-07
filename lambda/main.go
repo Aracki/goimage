@@ -16,6 +16,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+// InitS3 initialize new s3 client.
+// You need to set policies for lambda and s3 buckets.
 func initS3() *s3.S3 {
 	sess := session.Must(session.NewSession())
 	return s3.New(sess, &aws.Config{
@@ -24,7 +26,7 @@ func initS3() *s3.S3 {
 }
 
 // Err returns response with error message in body (if error is nil).
-// If returns error than body will be 'Internal server error' with status 500.
+// If returns error other than nil, than body will be 'Internal server error' with status 500.
 func Err(e error) (events.APIGatewayProxyResponse, error) {
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusInternalServerError,
@@ -37,6 +39,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// stdout and stderr are sent to AWS CloudWatch Logs
 	log.Printf("Proccessing Lambda request: %s\n", request.RequestContext.RequestID)
 
+	// Process request and populate Params struct with all query path parameters
 	p := api.Params{}
 	if err := api.Process(request, &p); err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
