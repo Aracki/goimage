@@ -43,6 +43,7 @@ func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 }
 
 // UploadAllToS3 uploads all the files from pathList to s3 destination-bucket.
+// Key for uploading files are path of file without tmp/. That is it cuts first 5 chars from path.
 func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
 
 	for _, p := range pathList {
@@ -57,7 +58,7 @@ func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
 		// timeout expires.
 		_, err = svc.PutObjectWithContext(ctx, &s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
-			Key:    aws.String(p),
+			Key:    aws.String(p[5:]),
 			Body:   f,
 		})
 		if err != nil {

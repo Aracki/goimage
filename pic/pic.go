@@ -21,7 +21,7 @@ func resizeImage(imgSrc image.Image, width, height int, alg, filter string) (ima
 	case "nfnt":
 		return resize.Resize(uint(width), uint(height), imgSrc, nfntFilter(filter)), nil
 	}
-	return nil, errors.New("nothin")
+	return nil, fmt.Errorf("algorithm not defined")
 }
 
 // CreateSpecificDimension creates folder based on dimension. (200x200, 450x400...)
@@ -46,13 +46,13 @@ func createSpecificDimension(img image.Image, width, height int, imgName, alg, f
 	// do actual resize
 	dstImg, err := resizeImage(img, width, height, alg, filter)
 	if err != nil {
-		return "", errors.Wrap(err, "Resize of image failed")
+		return "", errors.Wrap(err, "resize of image failed")
 	}
 	// ----------------
 
 	// write resized dstImg to file
 	if err := jpeg.Encode(f, dstImg, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
-		return "", errors.Wrap(err, "Could not encode image")
+		return "", errors.Wrap(err, "could not encode image")
 	}
 
 	return fullPath, nil
