@@ -44,14 +44,15 @@ func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 
 // UploadAllToS3 uploads all the files from pathList to s3 destination-bucket.
 // Key for uploading files are path of file without tmp/. That is it cuts first 5 chars from path.
-func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
+// Returns keys of successfully uploaded images to source-bucket.
+func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) (keys []string, err error) {
 
 	for _, p := range pathList {
 
 		ctx := context.Background()
 		f, err := os.Open(p)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		dstKey := "Thumbnails/" + p[5:]
@@ -67,14 +68,15 @@ func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
 			if aerr, ok := err.(awserr.Error); ok && aerr.Code() == request.CanceledErrorCode {
 				// If the SDK can determine the request or retry delay was canceled
 				// by a context the CanceledErrorCode error code will be returned.
-				return errors.Wrap(err, "upload canceled due to timeout")
+				return nil, errors.Wrap(err, "upload canceled due to timeout")
 			}
-			return err
+			return nil, err
 		}
 
 		fmt.Printf("Successfully uploaded file to %s/%s\n", bucketName, p)
+		keys = append(keys, dstKey)
 		f.Close()
 	}
 
-	return nil
+	return keys, nil
 }

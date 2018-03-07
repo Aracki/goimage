@@ -34,6 +34,14 @@ func Err(e error, status int) (events.APIGatewayProxyResponse, error) {
 	}, nil
 }
 
+/*
+	- handler must be a function
+	- handler may take between 0 and two arguments.
+	- if there are two arguments, the first argument must implement "context.Context".
+	- handler may return between 0 and two arguments.
+	- if there are two return values, the second argument must implement "error".
+	- if there is one return value it must implement "error".
+*/
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	// stdout and stderr are sent to AWS CloudWatch Logs
@@ -60,12 +68,13 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// Put multiple images on destination bucket to proper paths
-	if err = bucket.UploadAllToS3(svc, p.BucketDst, filePaths); err != nil {
+	keys, err := bucket.UploadAllToS3(svc, p.BucketDst, filePaths)
+	if err != nil {
 		return Err(err, http.StatusInternalServerError)
 	}
 
-	// Make filePaths json for response
-	jsonResp, err := json.Marshal(filePaths)
+	// Marshal all keys to json for response
+	jsonResp, err := json.Marshal(keys)
 	if err != nil {
 		return Err(err, http.StatusInternalServerError)
 	}
@@ -76,14 +85,6 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}, nil
 }
 
-/*
-	- handler must be a function
-	- handler may take between 0 and two arguments.
-	- if there are two arguments, the first argument must implement "context.Context".
-	- handler may return between 0 and two arguments.
-	- if there are two return values, the second argument must implement "error".
-	- if there is one return value it must implement "error".
-*/
 func main() {
 	lambda.Start(handler)
 }
