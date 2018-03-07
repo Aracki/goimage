@@ -20,7 +20,7 @@ func imagingFilter(f string) imaging.ResampleFilter {
 		return imaging.CatmullRom
 	case "gaussian":
 		return imaging.Gaussian
-	case "l":
+	case "lan":
 		return imaging.Lanczos
 	default:
 		return imaging.Box
@@ -38,9 +38,9 @@ func nfntFilter(f string) resize.InterpolationFunction {
 		return resize.Bicubic
 	case "mn":
 		return resize.MitchellNetravali
-	case "l2":
+	case "lan2":
 		return resize.Lanczos2
-	case "l3":
+	case "lan3":
 		return resize.Lanczos3
 	default:
 		return resize.NearestNeighbor

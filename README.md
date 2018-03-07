@@ -10,15 +10,21 @@ Here is official aws doc: [Programming model for Golang](https://docs.aws.amazon
 
 Under Execution Role you need to create new Role with access to: *`S3`* *&* *`CloudWatch Logs`*.
 
+------
+
 #### S3 buckets
 
 Go to AWS S3 console and create source & destination buckets. 
 
 **Note**: Serverless deploy will create one bucket to store application zip and compiled *cloudformation-template.json*.
 
+------
+
 #### IAM 
 
 Create user with access to: *`AmazonS3FullAccess`*, *`CloudFormation`*, *`CloudWatch Logs`*, *`IAM`*, *`Lambda`* *&* *`STS`*.
+
+------
 
 #### AWS API Gateway
 
@@ -39,10 +45,10 @@ For deploying lambda function you can use one of the following:
 
 Official documentation on how to deploy Lambda apps [Deploying Lambda Apps]( https://docs.aws.amazon.com/lambda/latest/dg/deploying-lambda-apps.html).
 
-#### Deploy via Serverless
+#### With Serverless
 
-- first install serverless `npm install serverless -g`
-- make binaries from cmd/main.go `make build`
+- `npm install serverless -g` 
+- `make build` 
 - deploy app with `serverless deploy` or `sls deploy`
 
 ## Usage
@@ -54,8 +60,8 @@ Make a POST request on API with following params:
 | name              | name of picture from source bucket to be resized |
 | bucketSrc         | name of source bucket                            |
 | bucketDst         | name of destination bucket                       |
-| lib               | lib keyword (given in Algorithm section)         |
-| filter            | filter keyword (given in ALgorithm section)      |
+| lib               | lib keyword (look at [Algorithm](#alg))          |
+| filter            | filter keyword (look at [Algorithm](#alg))       |
 
 Example of API request:
 
@@ -89,10 +95,36 @@ If successful function respond with 200 status and list of paths. Example:
 ```
 
 
-
+<a name="alg"/>
 ## Algorithms 
 
- -  **Lanczos** (Keyword: l)
+| library                | query param value |
+| ---------------------- | ----------------- |
+| disintegration/imaging | imaging           |
+| nfnt                   | nfnt              |
+
+| algorithms for disintegration/imaging | query param value |
+| :------------------------------------ | :---------------- |
+| NearestNeighbor                       | nn                |
+| Box                                   | box               |
+| Linear                                | linear            |
+| MitchellNetravali                     | mn                |
+| CatmullRom                            | cr                |
+| Gaussian                              | gaussian          |
+| Lanczos                               | lan               |
+
+| algorithms for nfnt | query param value |
+| :------------------ | :---------------- |
+| NearestNeighbor     | nn                |
+| Bilinear            | bil               |
+| Bicubic             | bic               |
+| MitchellNetravali   | mn                |
+| Lanczos2            | lan2              |
+| Lanczos3            | lan3              |
+
+#### Description
+
+ -  **Lanczos**
     Probably the best resampling filter for photographic images yielding sharp results, but it's slower than cubic filters (see below).
 
  -  **CatmullRom**
