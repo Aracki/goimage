@@ -10,21 +10,15 @@ Here is official aws doc: [Programming model for Golang](https://docs.aws.amazon
 
 Under Execution Role you need to create new Role with access to: *`S3`* *&* *`CloudWatch Logs`*.
 
-------
-
 #### S3 buckets
 
 Go to AWS S3 console and create source & destination buckets. 
 
 **Note**: Serverless deploy will create one bucket to store application zip and compiled *cloudformation-template.json*.
 
-------
-
 #### IAM 
 
 Create user with access to: *`AmazonS3FullAccess`*, *`CloudFormation`*, *`CloudWatch Logs`*, *`IAM`*, *`Lambda`* *&* *`STS`*.
-
-------
 
 #### AWS API Gateway
 
@@ -60,8 +54,8 @@ Make a POST request on API with following params:
 | name              | name of picture from source bucket to be resized |
 | bucketSrc         | name of source bucket                            |
 | bucketDst         | name of destination bucket                       |
-| lib               | lib keyword (look at [Algorithm](#alg))          |
-| filter            | filter keyword (look at [Algorithm](#alg))       |
+| lib               | lib keyword (look at [Algorithm](#algorithm))          |
+| filter            | filter keyword (look at [Algorithm](#algorithm))       |
 
 Example of API request:
 
@@ -94,9 +88,7 @@ If successful function respond with 200 status and list of paths. Example:
 ]
 ```
 
-
-<a name="alg"/>
-## Algorithms 
+## Algorithms
 
 | library                | query param value |
 | ---------------------- | ----------------- |
