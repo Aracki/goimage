@@ -54,11 +54,13 @@ func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) error {
 			return err
 		}
 
+		dstKey := "Thumbnails/" + p[5:]
+
 		// Uploads the object to S3. The Context will interrupt the request if the
 		// timeout expires.
 		_, err = svc.PutObjectWithContext(ctx, &s3.PutObjectInput{
 			Bucket: aws.String(bucketName),
-			Key:    aws.String(p[5:]),
+			Key:    aws.String(dstKey),
 			Body:   f,
 		})
 		if err != nil {

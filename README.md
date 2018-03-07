@@ -1,1 +1,5 @@
 # goImage
+
+## Installation
+
+## AWS configuration
