@@ -9,38 +9,19 @@ import (
 
 	"github.com/aracki/gohexis/gohexis/api"
 	"github.com/disintegration/imaging"
+	"github.com/nfnt/resize"
 	"github.com/pkg/errors"
 )
 
-func imagingFilter(f string) imaging.ResampleFilter {
-
-	switch f {
-	case "nn":
-		return imaging.NearestNeighbor
-	case "box":
-		return imaging.Box
-	case "linear":
-		return imaging.Linear
-	case "mn":
-		return imaging.MitchellNetravali
-	case "cr":
-		return imaging.CatmullRom
-	case "gaussian":
-		return imaging.Gaussian
-	case "l":
-		return imaging.Lanczos
-	default:
-		return imaging.Box
-	}
-}
-
-func resizeImage(img image.Image, width, height int, alg, filter string) image.Image {
+func resizeImage(imgSrc image.Image, width, height int, alg, filter string) (image.Image, error) {
 
 	switch alg {
 	case "imaging":
-		return imaging.Resize(img, width, height, imagingFilter(filter))
+		return imaging.Resize(imgSrc, width, height, imagingFilter(filter)), nil
+	case "nfnt":
+		return resize.Resize(uint(width), uint(height), imgSrc, nfntFilter(filter)), nil
 	}
-	return nil
+	return nil, errors.New("nothin")
 }
 
 // CreateSpecificDimension creates folder based on dimension. (200x200, 450x400...)
@@ -61,9 +42,12 @@ func createSpecificDimension(img image.Image, width, height int, imgName, alg, f
 		return "", errors.Wrap(err, "Could not create new file")
 	}
 
-	// ----------------resize
-	// do actual
-	dstImg := resizeImage(img, width, height, alg, filter)
+	// ----------------
+	// do actual resize
+	dstImg, err := resizeImage(img, width, height, alg, filter)
+	if err != nil {
+		return "", errors.Wrap(err, "Resize of image failed")
+	}
 	// ----------------
 
 	// write resized dstImg to file
