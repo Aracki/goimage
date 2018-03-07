@@ -27,9 +27,9 @@ func initS3() *s3.S3 {
 
 // Err returns response with error message in body (if error is nil).
 // If returns error other than nil, than body will be 'Internal server error' with status 500.
-func Err(e error) (events.APIGatewayProxyResponse, error) {
+func Err(e error, status int) (events.APIGatewayProxyResponse, error) {
 	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusInternalServerError,
+		StatusCode: status,
 		Body:       e.Error(),
 	}, nil
 }
@@ -42,7 +42,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Process request and populate Params struct with all query path parameters
 	p := api.Params{}
 	if err := api.Process(request, &p); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest}, err
+		return Err(err, http.StatusBadRequest)
 	}
 
 	svc := initS3()
@@ -50,24 +50,24 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// Get image from s3 bucket according to it's name and download it to /tmp/ folder
 	img, err := bucket.GetImageFromS3(svc, p.BucketSrc, p.ImgName)
 	if err != nil {
-		return Err(err)
+		return Err(err, http.StatusInternalServerError)
 	}
 
 	// Resize image with proper algorithm and create local files under /tmp/ folder
-	filePaths, err := pic.Resize(img, p.ImgName, p.Dimensions)
+	filePaths, err := pic.Resize(img, p.ImgName, p.Dimensions, p.Alg, p.Filter)
 	if err != nil {
-		return Err(err)
+		return Err(err, http.StatusInternalServerError)
 	}
 
 	// Put multiple images on destination bucket to proper paths
 	if err = bucket.UploadAllToS3(svc, p.BucketDst, filePaths); err != nil {
-		return Err(err)
+		return Err(err, http.StatusInternalServerError)
 	}
 
 	// Make filePaths json for response
 	jsonResp, err := json.Marshal(filePaths)
 	if err != nil {
-		return Err(err)
+		return Err(err, http.StatusInternalServerError)
 	}
 
 	return events.APIGatewayProxyResponse{
