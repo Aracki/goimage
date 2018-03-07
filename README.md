@@ -1,14 +1,8 @@
 # goImage
 
-[TOC]
-
 And official aws go library used https://github.com/aws/aws-lambda-go
 
 Here is official aws doc: [Programming model for Golang](https://docs.aws.amazon.com/lambda/latest/dg/programming-model-v2.html) 
-
-------
-
-
 
 ## AWS Configuration
 
@@ -53,9 +47,10 @@ Official documentation on how to deploy Lambda apps [Deploying Lambda Apps]( htt
 
 ## Usage
 
-Make _POST_ request on API url with following params:
-| name of parameter | about                                            |
-| ----------------- | ------------------------------------------------ |
+Make a POST request on API with following params:
+
+| name of parameter | what is it?                                      |
+| ----------------- | :----------------------------------------------- |
 | name              | name of picture from source bucket to be resized |
 | bucketSrc         | name of source bucket                            |
 | bucketDst         | name of destination bucket                       |
