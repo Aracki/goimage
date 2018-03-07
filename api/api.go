@@ -12,7 +12,7 @@ type Params struct {
 	BucketDst  string
 	ImgName    string
 	Dimensions []Dimension
-	Alg        string
+	Lib        string
 	Filter     string
 }
 
@@ -49,10 +49,10 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 		return fmt.Errorf("missing bucketDst param")
 	}
 
-	if v, ok := queryParams["alg"]; ok {
-		p.Alg = v
+	if v, ok := queryParams["lib"]; ok {
+		p.Lib = v
 	} else {
-		return fmt.Errorf("missing alg param")
+		return fmt.Errorf("missing lib param")
 	}
 
 	if v, ok := queryParams["filter"]; ok {
