@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/aracki/gohexis/gohexis/api"
 	"github.com/disintegration/imaging"
+	"github.com/hexis-hr/goImage/api"
 	"github.com/nfnt/resize"
 	"github.com/pkg/errors"
 )

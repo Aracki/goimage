@@ -5,15 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aracki/gohexis/gohexis/api"
-	"github.com/aracki/gohexis/gohexis/bucket"
-	"github.com/aracki/gohexis/gohexis/pic"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/hexis-hr/goImage/api"
+	"github.com/hexis-hr/goImage/bucket"
+	"github.com/hexis-hr/goImage/pic"
 )
 
 // InitS3 initialize new s3 client.
