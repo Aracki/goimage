@@ -1,10 +1,14 @@
 # goImage
 
+## Installation
+
+`go get -d github.com/hexis-hr/goImage...`
+
+## AWS Configuration
+
 And official aws go library used https://github.com/aws/aws-lambda-go
 
 Here is official aws doc: [Programming model for Golang](https://docs.aws.amazon.com/lambda/latest/dg/programming-model-v2.html) 
-
-## AWS Configuration
 
 #### Lambda function
 
