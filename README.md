@@ -54,16 +54,16 @@ Make a POST request on API with following params:
 | name              | name of picture from source bucket to be resized |
 | bucketSrc         | name of source bucket                            |
 | bucketDst         | name of destination bucket                       |
-| lib               | lib keyword (look at [Algorithm](#algorithm))          |
-| filter            | filter keyword (look at [Algorithm](#algorithm))       |
+| lib               | lib keyword (look at [Algorithm](#algorithms))          |
+| filter            | filter keyword (look at [Algorithm](#algorithms))       |
 
 Example of API request:
 
 ```
-http://[url]/name=under_the_sun.jpg&bucketSrc=gohexis-source&bucketDst=gohexis-destination&alg=imaging&filter=l
+http://[url]/name=under_the_sun.jpg&bucketSrc=gohexis-source&bucketDst=gohexis-destination&alg=imaging&filter=nn
 ```
 
-Array of variations needs to be sent as JSON to request body. Example:
+Array of variations needs to be sent as JSON to request body:
 
 ```
 {
@@ -80,12 +80,19 @@ Array of variations needs to be sent as JSON to request body. Example:
 }
 ```
 
-If successful function respond with 200 status and list of paths. Example:
+If function is successful, it will return status 200 and list of paths:
 ```
 [
   "Thumbnails/350x300/under_the_sun.jpg",
   "Thumbnails/1200x750/under_the_sun.jpg"
 ]
+```
+
+If not, it will return status 4xx, 5xx and message of error:
+
+```
+ErrCodeNoSuchKey occurred: NoSuchKey: The specified key does not exist.
+status code: 404, request id: 04BC7EA67C9B5407, host id: 4Uz26ywSVspr9BobIF/5yJS9q+8/xq2gP1IpTojZE+wMcecx27ajDhF3EAxXXEqkJs4qa3Quchw=
 ```
 
 ## Algorithms
