@@ -28,6 +28,7 @@ func initS3() *s3.S3 {
 // Err returns response with error message in body (if error is nil).
 // If returns error other than nil, than body will be 'Internal server error' with status 500.
 func Err(e error, status int) (events.APIGatewayProxyResponse, error) {
+	log.Println(e)
 	return events.APIGatewayProxyResponse{
 		StatusCode: status,
 		Body:       e.Error(),
@@ -62,7 +63,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// Resize image with proper library/filter and create local files under /tmp/ folder
-	filePaths, err := pic.Resize(img, p.ImgName, p.Dimensions, p.Lib, p.Filter)
+	filePaths, err := pic.Transform(img, p.ImgName, p.Dimensions, p.Subtype, p.Lib, p.Filter)
 	if err != nil {
 		return Err(err, http.StatusInternalServerError)
 	}

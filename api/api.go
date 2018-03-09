@@ -14,6 +14,7 @@ type Params struct {
 	Dimensions []Dimension
 	Lib        string
 	Filter     string
+	Subtype    string
 }
 
 type ReqBody struct {
@@ -49,16 +50,18 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 		return fmt.Errorf("missing bucketDst param")
 	}
 
+	if v, ok := queryParams["subtype"]; ok {
+		p.Subtype = v
+	} else {
+		return fmt.Errorf("missing subtype param")
+	}
+
 	if v, ok := queryParams["lib"]; ok {
 		p.Lib = v
-	} else {
-		return fmt.Errorf("missing lib param")
 	}
 
 	if v, ok := queryParams["filter"]; ok {
 		p.Filter = v
-	} else {
-		return fmt.Errorf("missing filter param")
 	}
 
 	if request.Body != "" {

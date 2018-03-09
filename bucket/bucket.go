@@ -29,16 +29,16 @@ func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 			return nil, errors.Wrap(err, "ErrCodeNoSuchKey occurred")
 		}
 		return nil, err
-	} else {
-		fmt.Printf("%s downloaded from %s\n", key, bucketName)
 	}
 	defer res.Body.Close()
+	fmt.Printf("%s downloaded from %s\n", key, bucketName)
 
 	img, _, err := image.Decode(res.Body)
 	if err != nil {
 		return nil, err
 	}
 
+	fmt.Printf("%s decoded to image\n", key)
 	return img, nil
 }
 
@@ -73,7 +73,7 @@ func UploadAllToS3(svc *s3.S3, bucketName string, pathList []string) (keys []str
 			return nil, err
 		}
 
-		fmt.Printf("Successfully uploaded file to %s/%s\n", bucketName, p)
+		fmt.Printf("%s uploaded to %s\n", p, bucketName)
 		keys = append(keys, dstKey)
 		f.Close()
 	}

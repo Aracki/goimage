@@ -1,9 +1,15 @@
 package pic
 
 import (
+	"image"
+
 	"github.com/disintegration/imaging"
 	"github.com/nfnt/resize"
 )
+
+type SubImager interface {
+	SubImage(r image.Rectangle) image.Image
+}
 
 func imagingFilter(f string) imaging.ResampleFilter {
 
