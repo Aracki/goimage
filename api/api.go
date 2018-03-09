@@ -26,11 +26,7 @@ type Dimension struct {
 	Height int `json:"h"`
 }
 
-// Process checks if there are proper dim params (eg. ?dim=200x200&dim350x350), name, bucketSrc and bucketDst.
-// Returns an error if there are some missing parameters.
-func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
-
-	queryParams := request.QueryStringParameters
+func processRequired(queryParams map[string]string, body string, p *Params) (err error) {
 
 	if v, ok := queryParams["name"]; ok {
 		p.ImgName = v
@@ -56,20 +52,12 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 		return fmt.Errorf("missing subtype param")
 	}
 
-	if v, ok := queryParams["lib"]; ok {
-		p.Lib = v
-	}
-
-	if v, ok := queryParams["filter"]; ok {
-		p.Filter = v
-	}
-
-	if request.Body != "" {
-		body := ReqBody{}
-		json.Unmarshal([]byte(request.Body), &body)
+	if body != "" {
+		reqbody := ReqBody{}
+		json.Unmarshal([]byte(body), &reqbody)
 
 		var allDim []Dimension
-		for _, d := range body.Dim {
+		for _, d := range reqbody.Dim {
 			allDim = append(allDim, d)
 		}
 		p.Dimensions = allDim
@@ -77,5 +65,28 @@ func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
 		return fmt.Errorf("missing body")
 	}
 
+	return nil
+}
+
+func processOptional(queryParams map[string]string, p *Params) {
+
+	if v, ok := queryParams["lib"]; ok {
+		p.Lib = v
+	}
+
+	if v, ok := queryParams["filter"]; ok {
+		p.Filter = v
+	}
+}
+
+// Process checks if there are required and optional params in request.
+// Returns an error if there are some missing required parameters.
+func Process(request events.APIGatewayProxyRequest, p *Params) (err error) {
+
+	if err := processRequired(request.QueryStringParameters, request.Body, p); err != nil {
+		return err
+	}
+
+	processOptional(request.QueryStringParameters, p)
 	return nil
 }
