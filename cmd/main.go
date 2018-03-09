@@ -62,8 +62,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return Err(err, http.StatusInternalServerError)
 	}
 
-	// Resize image with proper library/filter and create local files under /tmp/ folder
-	filePaths, err := pic.Transform(img, p.ImgName, p.Dimensions, p.Subtype, p.Lib, p.Filter)
+	// Transform image with proper params and create local files under /tmp/ folder
+	filePaths, err := pic.Transform(img, p)
 	if err != nil {
 		return Err(err, http.StatusInternalServerError)
 	}

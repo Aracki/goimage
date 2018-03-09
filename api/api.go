@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 )
@@ -12,9 +13,10 @@ type Params struct {
 	BucketDst  string
 	ImgName    string
 	Dimensions []Dimension
+	Subtype    string
 	Lib        string
 	Filter     string
-	Subtype    string
+	Quality    int
 }
 
 type ReqBody struct {
@@ -25,6 +27,10 @@ type Dimension struct {
 	Width  int `json:"w"`
 	Height int `json:"h"`
 }
+
+const (
+	defaultQuality = 75
+)
 
 func processRequired(queryParams map[string]string, body string, p *Params) (err error) {
 
@@ -76,6 +82,16 @@ func processOptional(queryParams map[string]string, p *Params) {
 
 	if v, ok := queryParams["filter"]; ok {
 		p.Filter = v
+	}
+
+	if v, ok := queryParams["q"]; ok {
+		q, err := strconv.Atoi(v)
+		if err != nil {
+			p.Quality = defaultQuality
+		}
+		p.Quality = q
+	} else {
+		p.Quality = defaultQuality
 	}
 }
 

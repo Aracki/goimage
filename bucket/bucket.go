@@ -13,9 +13,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GetImageFromS3 gets object from s3 source-bucket by key.
-// Encode that object to image interface
-// and returns it.
+// GetImageFromS3 gets object from s3 source-bucket by key and saves it in-memory.
+// Returns Image interface encoded from object.
 func GetImageFromS3(svc *s3.S3, bucketName, key string) (image.Image, error) {
 
 	ctx := context.Background()

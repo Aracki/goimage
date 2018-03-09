@@ -32,7 +32,7 @@ func resizeImage(imgSrc image.Image, width, height int, lib, filter string) (ima
 // DstImg is resized original stored in-memory. It is resized with a given library/filter.
 // That image is encoded into previously created file.
 // FullImgPath must start with /tmp/ because of lambda write-to-file rule.
-func createSpecificDimension(img image.Image, width, height int, imgName, lib, filter string) (string, error) {
+func createSpecificDimension(img image.Image, width, height int, imgName, lib, filter string, quality int) (string, error) {
 
 	basePath := "/tmp/"
 
@@ -56,7 +56,7 @@ func createSpecificDimension(img image.Image, width, height int, imgName, lib, f
 	// ----------------
 
 	// write resized dstImg to file
-	if err := jpeg.Encode(f, dstImg, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+	if err := jpeg.Encode(f, dstImg, &jpeg.Options{Quality: quality}); err != nil {
 		return "", errors.Wrap(err, "could not encode image")
 	}
 
@@ -67,11 +67,11 @@ func createSpecificDimension(img image.Image, width, height int, imgName, lib, f
 // According to that array it will resize each image sequentially.
 // Resized images are saved into proper folders.
 // Returns list of paths where are saved images.
-func regularResize(img image.Image, imgName string, dims []api.Dimension, lib, filter string) (paths []string, err error) {
+func regularResize(img image.Image, imgName string, dims []api.Dimension, lib, filter string, quality int) (paths []string, err error) {
 
 	for _, d := range dims {
 
-		fullPath, err := createSpecificDimension(img, d.Width, d.Height, imgName, lib, filter)
+		fullPath, err := createSpecificDimension(img, d.Width, d.Height, imgName, lib, filter, quality)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func regularResize(img image.Image, imgName string, dims []api.Dimension, lib, f
 	return paths, nil
 }
 
-func smartCrop(img image.Image, imgName string, dims []api.Dimension) (paths []string, err error) {
+func smartCrop(img image.Image, imgName string, dims []api.Dimension, quality int) (paths []string, err error) {
 
 	analyzer := smartcrop.NewAnalyzer(nfnt.NewDefaultResizer())
 	basePath := "/tmp/"
@@ -106,7 +106,7 @@ func smartCrop(img image.Image, imgName string, dims []api.Dimension) (paths []s
 
 		// The crop will have the requested aspect ratio, but you need to copy/scale it yourself
 		croppedImg := img.(SubImager).SubImage(topCrop)
-		if err := jpeg.Encode(f, croppedImg, &jpeg.Options{Quality: jpeg.DefaultQuality}); err != nil {
+		if err := jpeg.Encode(f, croppedImg, &jpeg.Options{Quality: quality}); err != nil {
 			return nil, err
 		}
 
@@ -116,14 +116,14 @@ func smartCrop(img image.Image, imgName string, dims []api.Dimension) (paths []s
 	return paths, nil
 }
 
-func Transform(img image.Image, imgName string, dims []api.Dimension, subtype, lib, filter string) ([]string, error) {
+func Transform(img image.Image, p api.Params) ([]string, error) {
 
-	switch subtype {
+	switch p.Subtype {
 	case "resize":
-		return regularResize(img, imgName, dims, lib, filter)
+		return regularResize(img, p.ImgName, p.Dimensions, p.Lib, p.Filter, p.Quality)
 	case "smart_crop":
-		return smartCrop(img, imgName, dims)
+		return smartCrop(img, p.ImgName, p.Dimensions, p.Quality)
 	default:
-		return nil, fmt.Errorf("%s subtype doesn't exist", subtype)
+		return nil, fmt.Errorf("%s subtype doesn't exist", p.Subtype)
 	}
 }
