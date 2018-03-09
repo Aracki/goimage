@@ -64,13 +64,14 @@ Make a POST request on API with following params:
 | name              | name of picture from source bucket to be resized |
 | bucketSrc         | name of source bucket                            |
 | bucketDst         | name of destination bucket                       |
-| lib               | lib keyword (look at [Algorithm](#algorithms))          |
-| filter            | filter keyword (look at [Algorithm](#algorithms))       |
+|  subtype			     | which type of image transformation is used (look at [Subtypes](#subtypes))	|
+| lib               | which library is used (look at [Algorithm](#algorithms)) |
+| filter            | which filter/algorithm is used (look at [Algorithm](#algorithms)) |
 
 Example of API request:
 
 ```
-http://[url]/name=under_the_sun.jpg&bucketSrc=gohexis-source&bucketDst=gohexis-destination&alg=imaging&filter=nn
+http://[url]/name=under_the_sun.jpg&bucketSrc=gohexis-source&bucketDst=gohexis-destination&subtype=resize&alg=imaging&filter=nn
 ```
 
 Array of variations needs to be sent as JSON to request body:
@@ -105,15 +106,34 @@ ErrCodeNoSuchKey occurred: NoSuchKey: The specified key does not exist.
 status code: 404, request id: 04BC7EA67C9B5407, host id: 4Uz26ywSVspr9BobIF/5yJS9q+8/xq2gP1IpTojZE+wMcecx27ajDhF3EAxXXEqkJs4qa3Quchw=
 ```
 
-## Algorithms
+## Subtypes
 
-| library                | query param value |
-| ---------------------- | ----------------- |
-| disintegration/imaging | imaging           |
-| nfnt                   | nfnt              |
+| subtype (type of image transformation) | query param value |
+| -------------------------------------- | ----------------- |
+| [resize](#resize)                      | resize            |
+| [smart crop](#smart-crop)              | smart_crop        |
+
+For both subtypes there are required params: 
+
+- name
+- bucketSrc
+- bucketDst
+
+and required body in JSON format:
+
+- dim array
+
+### Resize
+
+#### Algorithms
+
+| library                                                      | query param value |
+| ------------------------------------------------------------ | ----------------- |
+| [disintegration/imaging](https://github.com/disintegration/imaging) | imaging           |
+| [nfnt](https://github.com/nfnt/resize)                       | nfnt              |
 
 | algorithms for disintegration/imaging | query param value |
-| :------------------------------------ | :---------------- |
+| ------------------------------------- | ----------------- |
 | NearestNeighbor                       | nn                |
 | Box                                   | box               |
 | Linear                                | linear            |
@@ -123,7 +143,7 @@ status code: 404, request id: 04BC7EA67C9B5407, host id: 4Uz26ywSVspr9BobIF/5yJS
 | Lanczos                               | lan               |
 
 | algorithms for nfnt | query param value |
-| :------------------ | :---------------- |
+| ------------------- | ----------------- |
 | NearestNeighbor     | nn                |
 | Bilinear            | bil               |
 | Bicubic             | bic               |
@@ -131,25 +151,6 @@ status code: 404, request id: 04BC7EA67C9B5407, host id: 4Uz26ywSVspr9BobIF/5yJS
 | Lanczos2            | lan2              |
 | Lanczos3            | lan3              |
 
-#### Description
+### Smart Crop 
 
- -  **Lanczos**
-    Probably the best resampling filter for photographic images yielding sharp results, but it's slower than cubic filters (see below).
-
- -  **CatmullRom**
-    A sharp cubic filter. It's a good filter for both upscaling and downscaling if sharp results are needed.
-
-- **MitchellNetravali**
-    A high quality cubic filter that produces smoother results with less ringing than CatmullRom.
-
-- **Linear**
-    Bilinear interpolation filter, produces reasonably good, smooth output. It's faster than cubic filters.
-
-- **Box**
-    Simple and fast resampling filter appropriate for downscaling.
-    When upscaling it's similar to NearestNeighbor.
-
-- **NearestNeighbor**
-    Fastest resample filter, no antialiasing at all. Rarely used.
-
-    ​
+Smartcrop finds good image crops for arbitrary sizes. It is using https://github.com/muesli/smartcrop.
