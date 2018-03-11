@@ -2,6 +2,8 @@ package pic
 
 import (
 	"image"
+	"os"
+	"strconv"
 
 	"github.com/disintegration/imaging"
 	"github.com/nfnt/resize"
@@ -51,4 +53,21 @@ func nfntFilter(f string) resize.InterpolationFunction {
 	default:
 		return resize.NearestNeighbor
 	}
+}
+
+func createFolderAndFile(imgName string, width, height int) (f *os.File, fullImgPath string, err error) {
+
+	basePath := "/tmp/"
+	// create proper folder
+	folder := basePath + strconv.Itoa(width) + "x" + strconv.Itoa(height) + "/"
+	fullImgPath = folder + imgName
+	_ = os.MkdirAll(folder, os.ModePerm)
+
+	// create file
+	f, err = os.Create(fullImgPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return f, fullImgPath, nil
 }
