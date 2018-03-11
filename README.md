@@ -112,8 +112,9 @@ status code: 404, request id: 04BC7EA67C9B5407, host id: 4Uz26ywSVspr9BobIF/5yJS
 | -------------------------------------- | ----------------- |
 | [resize](#resize)                      | resize            |
 | [smart crop](#smart-crop)              | smart_crop        |
+| [crop](#crop)                          | crop              |
 
-For both subtypes there are required params: 
+For all subtypes there are required params: 
 
 - name
 - bucketSrc
@@ -154,3 +155,7 @@ and required body in JSON format:
 ### Smart Crop 
 
 Smartcrop finds good image crops for arbitrary sizes. It is using https://github.com/muesli/smartcrop.
+
+### Crop
+
+Crop resize and crop the image to fill the Width and Height area.
