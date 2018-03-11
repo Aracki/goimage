@@ -38,6 +38,7 @@ Make a POST request on API with following params:
 |  subtype			     | which type of image transformation is used (look at [Subtypes](#subtypes))	|
 | lib               | which library is used (look at [Algorithm](#algorithms)) |
 | filter            | which filter/algorithm is used (look at [Algorithm](#algorithms)) |
+| quality           | ranges from 1 to 100 inclusive, higher is better. |
 
 Example of API request:
 
