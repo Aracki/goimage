@@ -29,30 +29,37 @@ type Dimension struct {
 }
 
 const (
-	defaultQuality = 75
+	defaultQuality  = 75
+	param_name      = "name"
+	param_bucketSrc = "bucketSrc"
+	param_bucketDst = "bucketDst"
+	param_subtype   = "subtype"
+	param_lib       = "lib"
+	param_filter    = "filter"
+	param_quality   = "quality"
 )
 
 func processRequired(queryParams map[string]string, body string, p *Params) (err error) {
 
-	if v, ok := queryParams["name"]; ok {
+	if v, ok := queryParams[param_name]; ok {
 		p.ImgName = v
 	} else {
 		return fmt.Errorf("missing imgName param")
 	}
 
-	if v, ok := queryParams["bucketSrc"]; ok {
+	if v, ok := queryParams[param_bucketSrc]; ok {
 		p.BucketSrc = v
 	} else {
 		return fmt.Errorf("missing bucketSrc param")
 	}
 
-	if v, ok := queryParams["bucketDst"]; ok {
+	if v, ok := queryParams[param_bucketDst]; ok {
 		p.BucketDst = v
 	} else {
 		return fmt.Errorf("missing bucketDst param")
 	}
 
-	if v, ok := queryParams["subtype"]; ok {
+	if v, ok := queryParams[param_subtype]; ok {
 		p.Subtype = v
 	} else {
 		return fmt.Errorf("missing subtype param")
@@ -76,15 +83,15 @@ func processRequired(queryParams map[string]string, body string, p *Params) (err
 
 func processOptional(queryParams map[string]string, p *Params) {
 
-	if v, ok := queryParams["lib"]; ok {
+	if v, ok := queryParams[param_lib]; ok {
 		p.Lib = v
 	}
 
-	if v, ok := queryParams["filter"]; ok {
+	if v, ok := queryParams[param_filter]; ok {
 		p.Filter = v
 	}
 
-	if v, ok := queryParams["q"]; ok {
+	if v, ok := queryParams[param_quality]; ok {
 		q, err := strconv.Atoi(v)
 		if err != nil {
 			p.Quality = defaultQuality
