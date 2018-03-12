@@ -72,7 +72,7 @@ func regularResize(img image.Image, imgName string, dims []api.Dimension, lib, f
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("regular resize executed; %s saved under %s\n", imgName, fullPath)
+		fmt.Printf("regular resize; quality=%s; %s saved under %s\n", quality, imgName, fullPath)
 		paths = append(paths, fullPath)
 	}
 

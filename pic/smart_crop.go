@@ -31,7 +31,7 @@ func smartCrop(img image.Image, imgName string, dims []api.Dimension, quality in
 			return nil, err
 		}
 
-		log.Printf("smart crop[%+v] executed; %s saved under %s\n", topCrop, imgName, imgFullPath)
+		log.Printf("smart crop[%+v]; quality=%d; %s saved under %s\n", topCrop, quality, imgName, imgFullPath)
 		paths = append(paths, imgFullPath)
 
 		f.Close()

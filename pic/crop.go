@@ -23,7 +23,7 @@ func crop(img image.Image, imgName string, dims []api.Dimension, quality int) (p
 			return nil, err
 		}
 
-		log.Printf("crop executed; %s saved under %s\n", imgName, imgFullPath)
+		log.Printf("crop; quality=%s; %s saved under %s\n", imgName, quality, imgFullPath)
 		paths = append(paths, imgFullPath)
 
 		f.Close()
