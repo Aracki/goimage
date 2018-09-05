@@ -1,13 +1,13 @@
-# goImage
+# goimage
 
 ## Installation
 
-`go get -d github.com/hexis-hr/goImage...`
+`go get -d github.com/Aracki/goimage...`
 
 ## AWS Configuration
 
 You will need to configure AWS services.
-Look at [How to configure AWS](https://github.com/hexis-hr/goImage/tree/master/bucket)?
+Look at [How to configure AWS](https://github.com/Aracki/goimage/tree/master/bucket)?
 
 ## Deploy
 
@@ -43,7 +43,7 @@ Make a POST request on API with following params:
 Example of API request:
 
 ```
-http://[url]/name=under_the_sun.jpg&bucketSrc=gohexis-source&bucketDst=gohexis-destination&subtype=resize&alg=imaging&filter=nn
+http://[url]/name=under_the_sun.jpg&bucketSrc=source&bucketDst=destination&subtype=resize&alg=imaging&filter=nn
 ```
 
 Array of variations needs to be sent as JSON to request body:
